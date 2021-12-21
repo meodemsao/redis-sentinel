@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  redis_master:
+    image: redis:4.0.10-alpine
+    ports:
+      - 6379:6379
+    environment:
+      REDIS_PASSWORD: "foobared"
+    volumes:
+      - ./data/redis:/data
+
+  redis_slave:
+    image: redis:4.0.10-alpine
+    command: redis-server --slaveof redis_master 6379
+    depends_on:
+      - redis_master
+
+  sentinel1:
+    build: .
+    image: redis-sentinel
+    container_name: redis-sentinel-1
+    environment:
+      - MASTER_NAME=mymaster
+      - QUORUM=1
+      - MASTER=redis_master
+    depends_on:
+      - redis_master
+
+  sentinel2:
+    build: .
+    image: redis-sentinel
+    container_name: redis-sentinel-2
+    environment:
+      - MASTER_NAME=mymaster
+      - QUORUM=1
+      - MASTER=redis_master
+    depends_on:
+      - redis_master
+
+  sentinel3:
+    build: .
+    image: redis-sentinel
+    container_name: redis-sentinel-3
+    environment:
+      - MASTER_NAME=mymaster
+      - QUORUM=1
+      - MASTER=redis_master
+    depends_on:
+      - redis_master
